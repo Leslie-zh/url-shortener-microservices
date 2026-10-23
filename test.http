@@ -1,0 +1,14 @@
+### test API
+POST http://localhost:8000/api/links
+Content-Type: application/json
+
+{
+  "long_url": "https://www.google.com"
+}
+
+### 测试重定向
+GET http://localhost:8000/r/3-aZOw
+
+
+### 测试重定向
+GET http://localhost:8001/api/analytics/stats/3-aZOw

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>ShortUrl Microservices System</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .box { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        input { width: 70%; padding: 8px; margin-right: 10px; }
+        button { padding: 8px 15px; cursor: pointer; background: #007BFF; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        #result { margin-top: 15px; color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>URL Short Links & Click Analysis System</h1>
+
+    <div class="box">
+        <h2>1. Generate a short link</h2>
+        <input type="text" id="longUrl" placeholder="Paste a long URL, such as: https://www.google.com">
+        <button onclick="createShortLink()">Generate</button>
+        <div id="result"></div>
+    </div>
+
+    <div class="box">
+        <h2>2. Query Statistics</h2>
+        <input type="text" id="searchCode" placeholder="Enter the short code">
+        <button onclick="getStats()">Query</button>
+        <pre id="statsResult"></pre>
+    </div>
+
+    <script>
+        async function createShortLink() {
+            const longUrl = document.getElementById('longUrl').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!longUrl) return alert("Please enter the long URL");
+
+            try {
+                const response = await fetch('http://localhost:8000/api/links', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ long_url: longUrl })
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // 这里为了方便，直接用 localhost:8000/r/ 拼接，方便你点击测试
+                    resultDiv.innerHTML = `Short link generated successfully! Short code: <b>${data.code}</b><br>
+                    Test Redirect: <a href="http://localhost:8000/r/${data.code}" target="_blank">Click here to go to the page</a>`;
+                } else {
+                    resultDiv.style.color = 'red';
+                    resultDiv.innerText = "Generation Failed: " + data.error;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Unable to connect to link-service");
+            }
+        }
+
+        // 查询统计
+        async function getStats() {
+            const code = document.getElementById('searchCode').value;
+            const statsDiv = document.getElementById('statsResult');
+            
+            if (!code) return alert("Please enter the short code");
+
+            try {
+                // 注意这里请求的是 analytics-service 的 8001 端口
+                const response = await fetch(`http://localhost:8001/api/analytics/stats/${code}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    statsDiv.innerText = "Total Number of Clicks: " + data.total_clicks + "\n\nDaily Statistics:\n" + JSON.stringify(data.clicks_by_day, null, 2);
+                } else {
+                    statsDiv.innerText = "Query Failed: " + data.error;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Unable to connect to analytics-service");
+            }
+        }
+    </script>
+</body>
+</html>

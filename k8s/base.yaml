@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: url-shortener
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: url-shortener
+type: Opaque
+data:
+  # "shortener123" base64
+  POSTGRES_PASSWORD: c2hvcnRlbmVyMTIz
+  # "my-secret-key" base64 
+  INTERNAL_API_KEY: bXktc2VjcmV0LWtleQ==
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: url-shortener
+data:
+  DATABASE_URL: "postgresql+psycopg2://shortener:shortener123@postgres:5432/shortener_db"
+  ANALYTICS_URL: "http://analytics-service:8001"
