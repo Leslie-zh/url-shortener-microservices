@@ -37,7 +37,7 @@
             if (!longUrl) return alert("Please enter the long URL");
 
             try {
-                const response = await fetch('http://localhost:8000/api/links', {
+                const response = await fetch('/api/links', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ long_url: longUrl })
@@ -45,9 +45,8 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // 这里为了方便，直接用 localhost:8000/r/ 拼接，方便你点击测试
                     resultDiv.innerHTML = `Short link generated successfully! Short code: <b>${data.code}</b><br>
-                    Test Redirect: <a href="http://localhost:8000/r/${data.code}" target="_blank">Click here to go to the page</a>`;
+                    Test Redirect: <a href="/r/${data.code}" target="_blank">Click here to go to the page</a>`;
                 } else {
                     resultDiv.style.color = 'red';
                     resultDiv.innerText = "Generation Failed: " + data.error;
@@ -66,8 +65,7 @@
             if (!code) return alert("Please enter the short code");
 
             try {
-                // 注意这里请求的是 analytics-service 的 8001 端口
-                const response = await fetch(`http://localhost:8001/api/analytics/stats/${code}`);
+                const response = await fetch(`/api/analytics/stats/${code}`);
                 const data = await response.json();
                 
                 if (response.ok) {
